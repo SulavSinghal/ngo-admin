@@ -1,34 +1,49 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import React, { useState } from 'react';
+import AdminLogin from './components/AdminLogin';
+import AdminRegister from './components/AdminRegister';
+import Dashboard from './pages/Dashboard';
 
 function App() {
-  const [count, setCount] = useState(0)
+  // Simple auth state based on localStorage token
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('adminToken'));
+  const [showRegister, setShowRegister] = useState(false);
+
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    setIsLoggedIn(false);
+  };
+
+  const handleRegisterSuccess = () => {
+    setShowRegister(false);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="min-h-screen flex flex-col items-center justify-center bg-blue-50">
+      {!isLoggedIn ? (
+        showRegister ? (
+          <>
+            <AdminRegister onRegisterSuccess={handleRegisterSuccess} />
+            <button className="mt-3 text-blue-700 underline" onClick={() => setShowRegister(false)}>
+              Go to Login
+            </button>
+          </>
+        ) : (
+          <>
+            <AdminLogin onLoginSuccess={handleLoginSuccess} />
+            <button className="mt-3 text-blue-700 underline" onClick={() => setShowRegister(true)}>
+              Register New Admin
+            </button>
+          </>
+        )
+      ) : (
+        <Dashboard onLogout={handleLogout} />
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
