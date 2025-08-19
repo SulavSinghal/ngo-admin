@@ -10,6 +10,7 @@ import VolunteerManagement from './pages/VolunteerManagement';
 import AboutUsManagement from './pages/AboutUsManagement';
 import TestimonialManagement from './pages/TestimonialManagement';
 import InchargeManagement from './pages/InchargeManagement';
+import SlidesManagement from './pages/SlidesManagement';
 import Layout from './components/Layout';
 
 // Protected Route Component
@@ -34,6 +35,7 @@ function App() {
             <Route path="blog" element={<BlogManagement />} />
             <Route path="activities" element={<ActivityManagement />} />
             <Route path="team" element={<TeamManagement />} />
+            <Route path="slides" element={<SlidesManagement />} />
             <Route path="volunteers" element={<VolunteerManagement />} />
             <Route path="incharges" element={<InchargeManagement />} />
             <Route path="about-us" element={<AboutUsManagement />} />

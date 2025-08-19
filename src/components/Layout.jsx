@@ -13,6 +13,7 @@ const Layout = () => {
     { name: 'Blog Posts', href: '/blog', icon: '📝' },
     { name: 'Activities', href: '/activities', icon: '🎯' },
     { name: 'Team Members', href: '/team', icon: '👥' },
+    { name: 'Slides', href: '/slides', icon: '🖼️' },
     { name: 'Incharges', href: '/incharges', icon: '🧑‍💼' },
     { name: 'Volunteers', href: '/volunteers', icon: '🤝' },
     { name: 'About Us', href: '/about-us', icon: 'ℹ️' },
