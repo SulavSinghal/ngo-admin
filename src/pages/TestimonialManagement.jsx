@@ -6,14 +6,12 @@ const TestimonialManagement = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState(null);
+  
+  // --- 1. STATE UPDATED to match the Mongoose Model ---
   const [formData, setFormData] = useState({
     name: '',
-    role: '',
-    organization: '',
-    content: '',
-    rating: 5,
-    existingImageUrl: '',
-    isActive: true
+    occupation: '',
+    quote: '',
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
@@ -37,11 +35,14 @@ const TestimonialManagement = () => {
     e.preventDefault();
     try {
       const data = new FormData();
-      Object.entries(formData).forEach(([k, v]) => {
-        if (k !== 'existingImageUrl') data.append(k, v);
-      });
-      if (imageFile) data.append('image', imageFile);
-      if (!imageFile && formData.existingImageUrl) data.append('imageUrl', formData.existingImageUrl);
+      // Append form data that matches the backend model
+      data.append('name', formData.name);
+      data.append('occupation', formData.occupation);
+      data.append('quote', formData.quote);
+
+      if (imageFile) {
+        data.append('image', imageFile);
+      }
 
       if (editingTestimonial) {
         await axios.put(`http://localhost:5000/api/testimonials/${editingTestimonial._id}`, data);
@@ -54,23 +55,22 @@ const TestimonialManagement = () => {
       resetForm();
       fetchTestimonials();
     } catch (error) {
-      console.error('Error saving testimonial:', error);
+      // Log the detailed error from the backend for easier debugging
+      console.error('Error saving testimonial:', error.response ? error.response.data : error.message);
     }
   };
 
   const handleEdit = (testimonial) => {
     setEditingTestimonial(testimonial);
+    // --- 2. EDIT HANDLER UPDATED to use correct fields ---
     setFormData({
       name: testimonial.name || '',
-      role: testimonial.role || '',
-      organization: testimonial.organization || '',
-      content: testimonial.content || '',
-      rating: testimonial.rating || 5,
-      existingImageUrl: testimonial.imageUrl || '',
-      isActive: testimonial.isActive !== undefined ? testimonial.isActive : true
+      occupation: testimonial.occupation || '',
+      quote: testimonial.quote || '',
     });
     setImageFile(null);
-    setImagePreview(testimonial.imageUrl ? `http://localhost:5000${testimonial.imageUrl}` : '');
+    // Note: The public URL doesn't need the host prefix here
+    setImagePreview(testimonial.imageUrl ? `http://localhost:5000/${testimonial.imageUrl}` : '');
     setShowForm(true);
   };
 
@@ -85,27 +85,12 @@ const TestimonialManagement = () => {
     }
   };
 
-  const handleToggleStatus = async (testimonial) => {
-    try {
-      await axios.put(`http://localhost:5000/api/testimonials/${testimonial._id}`, {
-        ...testimonial,
-        isActive: !testimonial.isActive
-      });
-      fetchTestimonials();
-    } catch (error) {
-      console.error('Error updating testimonial status:', error);
-    }
-  };
-
   const resetForm = () => {
+    // --- 3. RESET FORM UPDATED ---
     setFormData({
       name: '',
-      role: '',
-      organization: '',
-      content: '',
-      rating: 5,
-      existingImageUrl: '',
-      isActive: true
+      occupation: '',
+      quote: '',
     });
     setImageFile(null);
     setImagePreview('');
@@ -115,10 +100,6 @@ const TestimonialManagement = () => {
     setShowForm(false);
     setEditingTestimonial(null);
     resetForm();
-  };
-
-  const renderStars = (rating) => {
-    return '⭐'.repeat(rating);
   };
 
   if (loading) {
@@ -137,14 +118,14 @@ const TestimonialManagement = () => {
           <p className="text-gray-600">Manage client and volunteer testimonials</p>
         </div>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => { setShowForm(true); resetForm(); setEditingTestimonial(null); }}
           className="px-4 py-2 rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
         >
           Add New Testimonial
         </button>
       </div>
 
-      {/* Testimonial Form */}
+      {/* --- 4. FORM JSX UPDATED to match the model --- */}
       {showForm && (
         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
@@ -161,117 +142,68 @@ const TestimonialManagement = () => {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   placeholder="Enter person's name"
                 />
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Role
+                  Occupation *
                 </label>
                 <input
                   type="text"
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter person's role"
+                  required
+                  value={formData.occupation}
+                  onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  placeholder="e.g., Volunteer, Program Beneficiary"
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Organization
-              </label>
-              <input
-                type="text"
-                value={formData.organization}
-                onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter organization name"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Testimonial Content *
+                Quote *
               </label>
               <textarea
                 required
                 rows={4}
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter the testimonial content"
+                value={formData.quote}
+                onChange={(e) => setFormData({ ...formData, quote: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                placeholder="Enter the testimonial quote"
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Rating
-                </label>
-                <select
-                  value={formData.rating}
-                  onChange={(e) => setFormData({ ...formData, rating: parseInt(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value={1}>1 Star</option>
-                  <option value={2}>2 Stars</option>
-                  <option value={3}>3 Stars</option>
-                  <option value={4}>4 Stars</option>
-                  <option value={5}>5 Stars</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Profile Image</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    setImageFile(file || null);
-                    setImagePreview(file ? URL.createObjectURL(file) : '');
-                  }}
-                  className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Profile Image *</label>
+              <input
+                type="file"
+                accept="image/*"
+                // Make the file input not required when editing
+                required={!editingTestimonial}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  setImageFile(file || null);
+                  setImagePreview(file ? URL.createObjectURL(file) : '');
+                }}
+                className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0"
+              />
+              {imagePreview && (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="mt-3 h-24 w-24 object-cover rounded-full border"
                 />
-                {(imagePreview || formData.existingImageUrl) && (
-                  <img
-                    src={imagePreview || `http://localhost:5000${formData.existingImageUrl}`}
-                    alt="Preview"
-                    className="mt-3 h-24 w-24 object-cover rounded-full border"
-                  />
-                )}
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="isActive"
-                  checked={formData.isActive}
-                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
-                  Active
-                </label>
-              </div>
+              )}
             </div>
 
             <div className="flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={cancelForm}
-                className="px-4 py-2 rounded-md font-medium bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors"
-              >
+              <button type="button" onClick={cancelForm} className="px-4 py-2 rounded-md font-medium bg-gray-200 text-gray-800">
                 Cancel
               </button>
-              <button
-                type="submit"
-                className="px-4 py-2 rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-              >
+              <button type="submit" className="px-4 py-2 rounded-md font-medium bg-blue-600 text-white">
                 {editingTestimonial ? 'Update Testimonial' : 'Create Testimonial'}
               </button>
             </div>
@@ -279,7 +211,7 @@ const TestimonialManagement = () => {
         </div>
       )}
 
-      {/* Testimonials List */}
+      {/* --- 5. TESTIMONIALS TABLE UPDATED --- */}
       <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">All Testimonials</h2>
         {testimonials.length === 0 ? (
@@ -292,53 +224,30 @@ const TestimonialManagement = () => {
             <table className="w-full border-collapse bg-white">
               <thead>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Role</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Organization</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Rating</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Occupation</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quote</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {testimonials.map((testimonial) => (
                   <tr key={testimonial._id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200 max-w-xs">
-                      <div className="truncate" title={testimonial.name}>
-                        {testimonial.name}
-                      </div>
+                    <td className="px-6 py-4 border-b border-gray-200">
+                      <img src={`http://localhost:5000/${testimonial.imageUrl}`} alt={testimonial.name} className="h-12 w-12 rounded-full object-cover" />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">{testimonial.role || 'No role'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">{testimonial.organization || 'No organization'}</td>
-                    <td>
-                      <span className="text-yellow-500" title={`${testimonial.rating} stars`}>
-                        {renderStars(testimonial.rating)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">
-                      <button
-                        onClick={() => handleToggleStatus(testimonial)}
-                        className={`px-2 py-1 text-xs font-medium rounded-full transition-colors ${
-                          testimonial.isActive
-                            ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                            : 'bg-red-100 text-red-800 hover:bg-red-200'
-                        }`}
-                      >
-                        {testimonial.isActive ? 'Active' : 'Inactive'}
-                      </button>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">{testimonial.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">{testimonial.occupation}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 border-b border-gray-200 max-w-sm">
+                      <p className="truncate" title={testimonial.quote}>{testimonial.quote}</p>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">
                       <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleEdit(testimonial)}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                        >
+                        <button onClick={() => handleEdit(testimonial)} className="text-blue-600 hover:text-blue-800 text-sm font-medium">
                           Edit
                         </button>
-                        <button
-                          onClick={() => handleDelete(testimonial._id)}
-                          className="text-red-600 hover:text-red-800 text-sm font-medium"
-                        >
+                        <button onClick={() => handleDelete(testimonial._id)} className="text-red-600 hover:text-red-800 text-sm font-medium">
                           Delete
                         </button>
                       </div>

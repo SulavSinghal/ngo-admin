@@ -8,15 +8,16 @@ const VolunteerManagement = () => {
   const [loading, setLoading] = useState(true);
   const [showOpportunityForm, setShowOpportunityForm] = useState(false);
   const [editingOpportunity, setEditingOpportunity] = useState(null);
+
+  // --- CORRECTED STATE that matches the Mongoose Model ---
   const [opportunityFormData, setOpportunityFormData] = useState({
     title: '',
     description: '',
-    requirements: '',
-    location: '',
-    duration: '',
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: new Date().toISOString().split('T')[0],
-    status: 'open'
+    category: '',
+    badge: '',
+    time: '',
+    hoursPerWeek: '',
+    icon: '',
   });
 
   useEffect(() => {
@@ -56,17 +57,17 @@ const VolunteerManagement = () => {
     }
   };
 
+  // --- CORRECTED EDIT HANDLER that matches the initial state ---
   const handleEditOpportunity = (opportunity) => {
     setEditingOpportunity(opportunity);
     setOpportunityFormData({
       title: opportunity.title || '',
       description: opportunity.description || '',
-      requirements: opportunity.requirements || '',
-      location: opportunity.location || '',
-      duration: opportunity.duration || '',
-      startDate: opportunity.startDate ? new Date(opportunity.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      endDate: opportunity.endDate ? new Date(opportunity.endDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-      status: opportunity.status || 'open'
+      category: opportunity.category || '',
+      badge: opportunity.badge || '',
+      time: opportunity.time || '',
+      hoursPerWeek: opportunity.hoursPerWeek || '',
+      icon: opportunity.icon || '',
     });
     setShowOpportunityForm(true);
   };
@@ -86,12 +87,11 @@ const VolunteerManagement = () => {
     setOpportunityFormData({
       title: '',
       description: '',
-      requirements: '',
-      location: '',
-      duration: '',
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date().toISOString().split('T')[0],
-      status: 'open'
+      category: '',
+      badge: '',
+      time: '',
+      hoursPerWeek: '',
+      icon: '',
     });
   };
 
@@ -101,25 +101,12 @@ const VolunteerManagement = () => {
     resetOpportunityForm();
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'open':
-        return 'bg-green-100 text-green-800';
-      case 'closed':
-        return 'bg-red-100 text-red-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+  // --- Common Styles for Reusability ---
+  const inputStyle = "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors";
+  const labelStyle = "block text-sm font-medium text-gray-700 mb-1";
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading volunteer data...</div>
-      </div>
-    );
+    return <div className="text-center p-8 text-gray-500">Loading volunteer data...</div>;
   }
 
   return (
@@ -130,281 +117,138 @@ const VolunteerManagement = () => {
           <p className="text-gray-600">Manage volunteer applications and opportunities</p>
         </div>
         <button
-          onClick={() => setShowOpportunityForm(true)}
-          className="px-4 py-2 rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+          onClick={() => { setShowOpportunityForm(true); setEditingOpportunity(null); resetOpportunityForm(); }}
+          className="px-4 py-2 rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
         >
           Add New Opportunity
         </button>
       </div>
 
-      {/* Tabs */}
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
           <button
             onClick={() => setActiveTab('applications')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'applications'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'applications' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
           >
             Applications ({volunteerApplications.length})
           </button>
           <button
             onClick={() => setActiveTab('opportunities')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'opportunities'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
+            className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === 'opportunities' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
           >
             Opportunities ({volunteerOpportunities.length})
           </button>
         </nav>
       </div>
 
-      {/* Volunteer Opportunity Form */}
       {showOpportunityForm && (
         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            {editingOpportunity ? 'Edit Opportunity' : 'Add New Opportunity'}
-          </h2>
-          <form onSubmit={handleOpportunitySubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{editingOpportunity ? 'Edit Opportunity' : 'Add New Opportunity'}</h2>
+          <form onSubmit={handleOpportunitySubmit} className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Title *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={opportunityFormData.title}
-                  onChange={(e) => setOpportunityFormData({ ...opportunityFormData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter opportunity title"
-                />
+                <label className={labelStyle}>Title *</label>
+                <input type="text" required value={opportunityFormData.title} onChange={(e) => setOpportunityFormData({ ...opportunityFormData, title: e.target.value })} className={inputStyle} placeholder="e.g., Event Staff" />
               </div>
-              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Status
-                </label>
-                <select
-                  value={opportunityFormData.status}
-                  onChange={(e) => setOpportunityFormData({ ...opportunityFormData, status: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="open">Open</option>
-                  <option value="closed">Closed</option>
-                  <option value="pending">Pending</option>
-                </select>
+                <label className={labelStyle}>Category</label>
+                <input type="text" value={opportunityFormData.category} onChange={(e) => setOpportunityFormData({ ...opportunityFormData, category: e.target.value })} className={inputStyle} placeholder="e.g., Community Outreach" />
               </div>
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description *
-              </label>
-              <textarea
-                required
-                rows={4}
-                value={opportunityFormData.description}
-                onChange={(e) => setOpportunityFormData({ ...opportunityFormData, description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter opportunity description"
-              />
+              <label className={labelStyle}>Description *</label>
+              <textarea required rows={4} value={opportunityFormData.description} onChange={(e) => setOpportunityFormData({ ...opportunityFormData, description: e.target.value })} className={inputStyle} placeholder="Describe the role..."></textarea>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Requirements
-                </label>
-                <textarea
-                  rows={3}
-                  value={opportunityFormData.requirements}
-                  onChange={(e) => setOpportunityFormData({ ...opportunityFormData, requirements: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter requirements"
-                />
+                <label className={labelStyle}>Badge</label>
+                <input type="text" value={opportunityFormData.badge} onChange={(e) => setOpportunityFormData({ ...opportunityFormData, badge: e.target.value })} className={inputStyle} placeholder="e.g., Remote, Weekends" />
               </div>
-              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Duration
-                </label>
-                <input
-                  type="text"
-                  value={opportunityFormData.duration}
-                  onChange={(e) => setOpportunityFormData({ ...opportunityFormData, duration: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., 3 months, 6 hours/week"
-                />
+                <label className={labelStyle}>Time Commitment</label>
+                <input type="text" value={opportunityFormData.time} onChange={(e) => setOpportunityFormData({ ...opportunityFormData, time: e.target.value })} className={inputStyle} placeholder="e.g., Mornings" />
+              </div>
+              <div>
+                <label className={labelStyle}>Hours Per Week</label>
+                <input type="text" value={opportunityFormData.hoursPerWeek} onChange={(e) => setOpportunityFormData({ ...opportunityFormData, hoursPerWeek: e.target.value })} className={inputStyle} placeholder="e.g., 5-10 hours" />
               </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  value={opportunityFormData.location}
-                  onChange={(e) => setOpportunityFormData({ ...opportunityFormData, location: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter location"
-                />
+             <div>
+                <label className={labelStyle}>Icon URL (Optional)</label>
+                <input type="text" value={opportunityFormData.icon} onChange={(e) => setOpportunityFormData({ ...opportunityFormData, icon: e.target.value })} className={inputStyle} placeholder="https://.../icon.png" />
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Start Date
-                </label>
-                <input
-                  type="date"
-                  value={opportunityFormData.startDate}
-                  onChange={(e) => setOpportunityFormData({ ...opportunityFormData, startDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  End Date
-                </label>
-                <input
-                  type="date"
-                  value={opportunityFormData.endDate}
-                  onChange={(e) => setOpportunityFormData({ ...opportunityFormData, endDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={cancelOpportunityForm}
-                className="px-4 py-2 rounded-md font-medium bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-              >
-                {editingOpportunity ? 'Update Opportunity' : 'Create Opportunity'}
-              </button>
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+              <button type="button" onClick={cancelOpportunityForm} className="px-4 py-2 rounded-md font-medium bg-gray-200 text-gray-800 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-colors">Cancel</button>
+              <button type="submit" className="px-4 py-2 rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">{editingOpportunity ? 'Update Opportunity' : 'Create Opportunity'}</button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Applications Tab */}
       {activeTab === 'applications' && (
-        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Volunteer Applications</h2>
-          {volunteerApplications.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">
-              <span className="text-4xl">📝</span>
-              <p className="mt-2">No volunteer applications found</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse bg-white">
-                <thead>
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Email</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Phone</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Interest Area</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Experience</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {volunteerApplications.map((application) => (
-                    <tr key={application._id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">{application.name}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">{application.email}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">{application.phone || 'No phone'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">{application.interestArea || 'Not specified'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">{application.experience || 'No experience'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">
-                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                          New
-                        </span>
-                      </td>
+           <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Area of Interest</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Availability</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                  {volunteerApplications.map((app) => (
+                    <tr key={app._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-900 font-medium">{app.fullName}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-700">{app.email}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-700">{app.phone || 'N/A'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-700">{app.areaOfInterest || 'N/A'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-700">{app.availability?.join(', ') || 'N/A'}</td>
                     </tr>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+              </tbody>
+            </table>
+          </div>
+         </div>
       )}
 
-      {/* Opportunities Tab */}
       {activeTab === 'opportunities' && (
         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Volunteer Opportunities</h2>
-          {volunteerOpportunities.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">
-              <span className="text-4xl">🤝</span>
-              <p className="mt-2">No volunteer opportunities found</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse bg-white">
-                <thead>
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Title</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Location</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Duration</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Start Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">Actions</th>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Badge</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Hours/Week</th>
+                  <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {volunteerOpportunities.map((op) => (
+                  <tr key={op._id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-900 font-medium">{op.title}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-700">{op.category || 'N/A'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-700">{op.badge || 'N/A'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-700">{op.time || 'N/A'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-700">{op.hoursPerWeek || 'N/A'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center space-x-4">
+                        <button onClick={() => handleEditOpportunity(op)} className="text-blue-600 hover:text-blue-800 font-medium">Edit</button>
+                        <button onClick={() => handleDeleteOpportunity(op._id)} className="text-red-600 hover:text-red-800 font-medium">Delete</button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {volunteerOpportunities.map((opportunity) => (
-                    <tr key={opportunity._id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200 max-w-xs">
-                        <div className="truncate" title={opportunity.title}>
-                          {opportunity.title}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">{opportunity.location || 'No location'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">{opportunity.duration || 'Not specified'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">{opportunity.startDate ? new Date(opportunity.startDate).toLocaleDateString() : 'No date'}</td>
-                      <td>
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(opportunity.status)}`}>
-                          {opportunity.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleEditOpportunity(opportunity)}
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteOpportunity(opportunity._id)}
-                            className="text-red-600 hover:text-red-800 text-sm font-medium"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

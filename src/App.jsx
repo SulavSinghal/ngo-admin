@@ -12,6 +12,7 @@ import TestimonialManagement from './pages/TestimonialManagement';
 import InchargeManagement from './pages/InchargeManagement';
 import SlidesManagement from './pages/SlidesManagement';
 import Layout from './components/Layout';
+import VolunteerStoryManagement from './pages/VolunteerStory';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -40,6 +41,7 @@ function App() {
             <Route path="incharges" element={<InchargeManagement />} />
             <Route path="about-us" element={<AboutUsManagement />} />
             <Route path="testimonials" element={<TestimonialManagement />} />
+            <Route path="volunteer-stories" element={<VolunteerStoryManagement />} />
           </Route>
         </Routes>
       </Router>
