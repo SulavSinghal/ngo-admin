@@ -1,48 +1,47 @@
-import React, { useState } from 'react';
-import AdminLogin from './components/AdminLogin';
-import AdminRegister from './components/AdminRegister';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import BlogManagement from './pages/BlogManagement';
+import ActivityManagement from './pages/ActivityManagement';
+import TeamManagement from './pages/TeamManagement';
+import VolunteerManagement from './pages/VolunteerManagement';
+import AboutUsManagement from './pages/AboutUsManagement';
+import TestimonialManagement from './pages/TestimonialManagement';
+import InchargeManagement from './pages/InchargeManagement';
+import Layout from './components/Layout';
+
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
 
 function App() {
-  // Simple auth state based on localStorage token
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('adminToken'));
-  const [showRegister, setShowRegister] = useState(false);
-
-  const handleLoginSuccess = () => {
-    setIsLoggedIn(true);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    setIsLoggedIn(false);
-  };
-
-  const handleRegisterSuccess = () => {
-    setShowRegister(false);
-  };
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-blue-50">
-      {!isLoggedIn ? (
-        showRegister ? (
-          <>
-            <AdminRegister onRegisterSuccess={handleRegisterSuccess} />
-            <button className="mt-3 text-blue-700 underline" onClick={() => setShowRegister(false)}>
-              Go to Login
-            </button>
-          </>
-        ) : (
-          <>
-            <AdminLogin onLoginSuccess={handleLoginSuccess} />
-            <button className="mt-3 text-blue-700 underline" onClick={() => setShowRegister(true)}>
-              Register New Admin
-            </button>
-          </>
-        )
-      ) : (
-        <Dashboard onLogout={handleLogout} />
-      )}
-    </div>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }>
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="blog" element={<BlogManagement />} />
+            <Route path="activities" element={<ActivityManagement />} />
+            <Route path="team" element={<TeamManagement />} />
+            <Route path="volunteers" element={<VolunteerManagement />} />
+            <Route path="incharges" element={<InchargeManagement />} />
+            <Route path="about-us" element={<AboutUsManagement />} />
+            <Route path="testimonials" element={<TestimonialManagement />} />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
