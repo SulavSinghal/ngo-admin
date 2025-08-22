@@ -19,6 +19,7 @@ const Layout = () => {
     { name: 'About Us', href: '/about-us', icon: 'ℹ️' },
     { name: 'Testimonials', href: '/testimonials', icon: '💬' },
     { name: 'Volunteer Stories', href: '/volunteer-stories', icon: '📖' },
+    {name: 'Contact Us',href:'/contact-page',icon:''}
   ];
 
   const handleLogout = () => {

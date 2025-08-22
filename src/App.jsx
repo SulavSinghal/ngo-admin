@@ -13,7 +13,7 @@ import InchargeManagement from './pages/InchargeManagement';
 import SlidesManagement from './pages/SlidesManagement';
 import Layout from './components/Layout';
 import VolunteerStoryManagement from './pages/VolunteerStory';
-
+import ContactPage from './pages/ContactPageManagement';
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -42,6 +42,7 @@ function App() {
             <Route path="about-us" element={<AboutUsManagement />} />
             <Route path="testimonials" element={<TestimonialManagement />} />
             <Route path="volunteer-stories" element={<VolunteerStoryManagement />} />
+            <Route path="contact-page" element={<ContactPage />} />
           </Route>
         </Routes>
       </Router>
