@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const TestimonialManagement = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +22,7 @@ const TestimonialManagement = () => {
 
   const fetchTestimonials = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/testimonials');
+      const response = await axios.get(`${API_URL}/api/testimonials`);
       setTestimonials(response.data);
     } catch (error) {
       console.error('Error fetching testimonials:', error);
@@ -45,9 +45,9 @@ const TestimonialManagement = () => {
       }
 
       if (editingTestimonial) {
-        await axios.put(`http://localhost:5000/api/testimonials/${editingTestimonial._id}`, data);
+        await axios.put(`${API_URL}/api/testimonials/${editingTestimonial._id}`, data);
       } else {
-        await axios.post('http://localhost:5000/api/testimonials', data);
+        await axios.post(`${API_URL}/api/testimonials`, data);
       }
       
       setShowForm(false);
@@ -70,14 +70,14 @@ const TestimonialManagement = () => {
     });
     setImageFile(null);
     // Note: The public URL doesn't need the host prefix here
-    setImagePreview(testimonial.imageUrl ? `http://localhost:5000/${testimonial.imageUrl}` : '');
+    setImagePreview(testimonial.imageUrl ? `${API_URL}/${testimonial.imageUrl}` : '');
     setShowForm(true);
   };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this testimonial?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/testimonials/${id}`);
+        await axios.delete(`${API_URL}/api/testimonials/${id}`);
         fetchTestimonials();
       } catch (error) {
         console.error('Error deleting testimonial:', error);
@@ -235,7 +235,7 @@ const TestimonialManagement = () => {
                 {testimonials.map((testimonial) => (
                   <tr key={testimonial._id}>
                     <td className="px-6 py-4 border-b border-gray-200">
-                      <img src={`http://localhost:5000/${testimonial.imageUrl}`} alt={testimonial.name} className="h-12 w-12 rounded-full object-cover" />
+                      <img src={`${API_URL}/${testimonial.imageUrl}`} alt={testimonial.name} className="h-12 w-12 rounded-full object-cover" />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">{testimonial.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">{testimonial.occupation}</td>

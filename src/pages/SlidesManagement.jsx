@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const SlidesManagement = () => {
   const [slides, setSlides] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,7 @@ const SlidesManagement = () => {
 
   const fetchSlides = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/slides');
+      const res = await axios.get( `${API_URL}/api/slides`);
       setSlides(res.data);
     } catch (e) { console.error('Error fetching slides', e); } finally { setLoading(false); }
   };
@@ -43,9 +43,9 @@ const SlidesManagement = () => {
       if (imageFile) data.append('image', imageFile);
 
       if (editing) {
-        await axios.put(`http://localhost:5000/api/slides/${editing._id}`, data, { headers: { Authorization: localStorage.getItem('adminToken') ? `Bearer ${localStorage.getItem('adminToken')}` : undefined } });
+        await axios.put(`${API_URL}/api/slides/${editing._id}`, data, { headers: { Authorization: localStorage.getItem('adminToken') ? `Bearer ${localStorage.getItem('adminToken')}` : undefined } });
       } else {
-        await axios.post('http://localhost:5000/api/slides', data, { headers: { Authorization: localStorage.getItem('adminToken') ? `Bearer ${localStorage.getItem('adminToken')}` : undefined } });
+        await axios.post(`${API_URL}/api/slides`, data, { headers: { Authorization: localStorage.getItem('adminToken') ? `Bearer ${localStorage.getItem('adminToken')}` : undefined } });
       }
       setShowForm(false); setEditing(null); resetForm(); fetchSlides();
     } catch (e) { console.error('Error saving slide', e); }
@@ -56,7 +56,7 @@ const SlidesManagement = () => {
     setFormData({
       headline: slide.headline || '', description: slide.description || '', ctaText: slide.ctaText || '', ctaLink: slide.ctaLink || '', secondaryText: slide.secondaryText || '', backgroundColor: slide.backgroundColor || '#1f326f', textColor: slide.textColor || '#ffffff', order: slide.order || 0, active: !!slide.active
     });
-    setImagePreview(slide.image ? `http://localhost:5000${slide.image}` : '');
+    setImagePreview(slide.image ? `${API_URL}${slide.image}` : '');
     setImageFile(null);
     setShowForm(true);
   };
@@ -64,7 +64,7 @@ const SlidesManagement = () => {
   const handleDelete = async (id) => {
     if (!confirm('Delete slide?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/slides/${id}`, { headers: { Authorization: localStorage.getItem('adminToken') ? `Bearer ${localStorage.getItem('adminToken')}` : undefined } });
+      await axios.delete(`${API_URL}/api/slides/${id}`, { headers: { Authorization: localStorage.getItem('adminToken') ? `Bearer ${localStorage.getItem('adminToken')}` : undefined } });
       fetchSlides();
     } catch (e) { console.error('Error deleting slide', e); }
   };

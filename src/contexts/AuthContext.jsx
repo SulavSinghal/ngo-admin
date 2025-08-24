@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
 
   const verifyToken = async (token) => {
     try {
-      const response = await axios.get('http://localhost:5000/api/verify-admin', {
+      const response = await axios.get(`${API_URL}/api/verify-admin`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.valid) {
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/login', {
+      const response = await axios.post(`${API_URL}/api/login`, {
         email,
         password
       });

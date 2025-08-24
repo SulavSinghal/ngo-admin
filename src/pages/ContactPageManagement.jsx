@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FiMessageSquare, FiSettings, FiSave, FiLoader } from 'react-icons/fi';
-
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 // Main component for the entire admin panel
 const ContactPage = () => {
   // State to manage which tab is currently active ('messages' or 'settings')
@@ -61,7 +61,7 @@ const MessagesManager = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/messages');
+        const res = await axios.get(`${API_URL}/api/messages`);
 
         // ✅ CORRECTED PART: Check if the response data is an array
         if (Array.isArray(res.data)) {
@@ -179,7 +179,7 @@ const handleSubmit = async (e) => {
   setStatus({ message: 'Saving...', type: 'loading' });
   try {
     // 1. Capture the response from the server
-    const res = await axios.put('http://localhost:5000/api/contact-info', formData);
+    const res = await axios.put(`${API_URL}/api/contact-info`, formData);
 
     // 2. Update the local state with the fresh data from the response
     setFormData(res.data); 

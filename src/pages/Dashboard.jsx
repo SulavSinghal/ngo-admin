@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const Card = ({ children }) => (
   <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">{children}</div>
 );
@@ -23,11 +23,11 @@ const Dashboard = () => {
   const fetchStats = async () => {
     try {
       const [blogRes, activitiesRes, teamRes, volunteersRes, testimonialsRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/blog'),
-        axios.get('http://localhost:5000/api/activities'),
-        axios.get('http://localhost:5000/api/teamMembers'),
-        axios.get('http://localhost:5000/api/volunteer-applications'),
-        axios.get('http://localhost:5000/api/testimonials')
+        axios.get( `${API_URL}/api/blog`),
+        axios.get(`${API_URL}/api/activities`),
+        axios.get(`${API_URL}/api/teamMembers`),
+        axios.get(`${API_URL}/api/volunteer-applications`),
+        axios.get(`${API_URL}/api/testimonials`)
       ]);
 
       setStats({

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const TeamManagement = () => {
   const [teamMembers, setTeamMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,7 @@ const TeamManagement = () => {
 
   const fetchTeamMembers = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/teamMembers');
+      const response = await axios.get(`${API_URL}/api/teamMembers`);
       setTeamMembers(response.data);
     } catch (error) {
       console.error('Error fetching team members:', error);
@@ -41,9 +41,9 @@ const TeamManagement = () => {
       if (imageFile) data.append('image', imageFile);
 
       if (editingMember) {
-        await axios.put(`http://localhost:5000/api/teamMembers/${editingMember._id}`, data);
+        await axios.put(`${API_URL}/api/teamMembers/${editingMember._id}`, data);
       } else {
-        await axios.post('http://localhost:5000/api/teamMembers', data);
+        await axios.post(`${API_URL}/api/teamMembers`, data);
       }
       
       setShowForm(false);
@@ -67,14 +67,14 @@ const TeamManagement = () => {
       linkedin: member.linkedin || ''
     });
     setImageFile(null);
-    setImagePreview(member.image ? `http://localhost:5000/uploads/${member.image}` : '');
+    setImagePreview(member.image ? `${API_URL}/uploads/${member.image}` : '');
     setShowForm(true);
   };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this team member?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/teamMembers/${id}`);
+        await axios.delete(`${API_URL}/api/teamMembers/${id}`);
         fetchTeamMembers();
       } catch (error) {
         console.error('Error deleting team member:', error);

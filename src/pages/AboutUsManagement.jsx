@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const AboutUsManagement = () => {
   const [aboutUs, setAboutUs] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +26,7 @@ const AboutUsManagement = () => {
 
   const fetchAboutUs = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/about-us');
+      const response = await axios.get(`${API_URL}/api/about-us`);
       if (response.data && response.data.length > 0) {
         setAboutUs(response.data[0]);
         setFormData({
@@ -55,9 +55,9 @@ const AboutUsManagement = () => {
     e.preventDefault();
     try {
       if (aboutUs) {
-        await axios.put(`http://localhost:5000/api/about-us/${aboutUs._id}`, formData);
+        await axios.put(`${API_URL}/api/about-us/${aboutUs._id}`, formData);
       } else {
-        await axios.post('http://localhost:5000/api/about-us', formData);
+        await axios.post(`${API_URL}/api/about-us`, formData);
       }
       
       setShowForm(false);

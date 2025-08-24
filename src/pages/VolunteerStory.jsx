@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
+const API_URL1 = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const VolunteerStoryManagement = () => {
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +17,7 @@ const VolunteerStoryManagement = () => {
   const [imagePreview, setImagePreview] = useState('');
 
   // API endpoint for volunteer stories
-  const API_URL = 'http://localhost:5000/api/volunteer-stories';
+  const API_URL = `${API_URL1}/api/volunteer-stories`;
 
   useEffect(() => {
     fetchStories();
@@ -74,7 +74,7 @@ const VolunteerStoryManagement = () => {
       quote: story.quote || '',
     });
     // Construct full URL for image preview
-    setImagePreview(story.imageUrl ? `http://localhost:5000/${story.imageUrl.replace(/\\/g, "/")}` : '');
+    setImagePreview(story.imageUrl ? `${API_URL1}/${story.imageUrl.replace(/\\/g, "/")}` : '');
     setImageFile(null);
     setShowForm(true);
   };
@@ -187,7 +187,7 @@ const VolunteerStoryManagement = () => {
                 <tr key={story._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     {story.imageUrl ? (
-                      <img src={`http://localhost:5000/${story.imageUrl.replace(/\\/g, "/")}`} alt={story.name} className="h-12 w-12 rounded-full object-cover" />
+                      <img src={`${API_URL1}/${story.imageUrl.replace(/\\/g, "/")}`} alt={story.name} className="h-12 w-12 rounded-full object-cover" />
                     ) : (
                       <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs">No Img</div>
                     )}

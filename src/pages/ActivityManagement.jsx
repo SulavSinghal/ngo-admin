@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const ActivityManagement = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +22,7 @@ const ActivityManagement = () => {
 
   const fetchActivities = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/activities');
+      const response = await axios.get(`${API_URL}/api/activities`);
       setActivities(response.data);
     } catch (error) {
       console.error('Error fetching activities:', error);
@@ -43,9 +43,9 @@ const ActivityManagement = () => {
       if (imageFile) data.append('image', imageFile);
 
       if (editingActivity) {
-        await axios.put(`http://localhost:5000/api/activities/${editingActivity._id}`, data);
+        await axios.put(`${API_URL}/api/activities/${editingActivity._id}`, data);
       } else {
-        await axios.post('http://localhost:5000/api/activities', data);
+        await axios.post(`${API_URL}/api/activities`, data);
       }
       
       setShowForm(false);
@@ -67,14 +67,14 @@ const ActivityManagement = () => {
       location: activity.location,
     });
     setImageFile(null);
-    setImagePreview(activity.imageUrl ? `http://localhost:5000${activity.imageUrl}` : '');
+    setImagePreview(activity.imageUrl ? `${API_URL}${activity.imageUrl}` : '');
     setShowForm(true);
   };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this activity?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/activities/${id}`);
+        await axios.delete(`${API_URL}/api/activities/${id}`);
         fetchActivities();
       } catch (error) {
         console.error('Error deleting activity:', error);

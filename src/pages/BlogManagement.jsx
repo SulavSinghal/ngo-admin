@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const BlogManagement = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +22,7 @@ const BlogManagement = () => {
 
   const fetchBlogs = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/blog');
+      const response = await axios.get(`${API_URL}/api/blog`);
       setBlogs(response.data);
     } catch (error) {
       console.error('Error fetching blogs:', error);
@@ -46,9 +46,9 @@ const BlogManagement = () => {
       }
 
       if (editingBlog) {
-        await axios.put(`http://localhost:5000/api/blog/${editingBlog._id}`, data);
+        await axios.put(`${API_URL}/api/blog/${editingBlog._id}`, data);
       } else {
-        await axios.post('http://localhost:5000/api/blog', data);
+        await axios.post(`${API_URL}/api/blog`, data);
       }
       
       setShowForm(false);
@@ -70,14 +70,14 @@ const BlogManagement = () => {
       date: blog.date ? new Date(blog.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
     });
     setImageFile(null);
-    setImagePreview(blog.imageUrl ? `http://localhost:5000${blog.imageUrl}` : '');
+    setImagePreview(blog.imageUrl ? `${API_URL}${blog.imageUrl}` : '');
     setShowForm(true);
   };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this blog post?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/blog/${id}`);
+        await axios.delete(`${API_URL}/api/blog/${id}`);
         fetchBlogs();
       } catch (error) {
         console.error('Error deleting blog:', error);
@@ -191,7 +191,7 @@ const BlogManagement = () => {
                 />
                 {(imagePreview || formData.existingImageUrl) && (
                   <img
-                    src={imagePreview || `http://localhost:5000${formData.existingImageUrl}`}
+                    src={imagePreview || `${API_URL}${formData.existingImageUrl}`}
                     alt="Preview"
                     className="mt-3 h-32 w-32 object-cover rounded border"
                   />

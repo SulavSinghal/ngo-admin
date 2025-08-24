@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const VolunteerManagement = () => {
   const [volunteerApplications, setVolunteerApplications] = useState([]);
   const [volunteerOpportunities, setVolunteerOpportunities] = useState([]);
@@ -27,8 +27,8 @@ const VolunteerManagement = () => {
   const fetchData = async () => {
     try {
       const [applicationsRes, opportunitiesRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/volunteer-applications'),
-        axios.get('http://localhost:5000/api/volunteer-opportunities')
+        axios.get(`${API_URL}/api/volunteer-applications`),
+        axios.get(`${API_URL}/api/volunteer-opportunities`)
       ]);
       setVolunteerApplications(applicationsRes.data);
       setVolunteerOpportunities(opportunitiesRes.data);
@@ -43,9 +43,9 @@ const VolunteerManagement = () => {
     e.preventDefault();
     try {
       if (editingOpportunity) {
-        await axios.put(`http://localhost:5000/api/volunteer-opportunities/${editingOpportunity._id}`, opportunityFormData);
+        await axios.put(`${API_URL}/api/volunteer-opportunities/${editingOpportunity._id}`, opportunityFormData);
       } else {
-        await axios.post('http://localhost:5000/api/volunteer-opportunities', opportunityFormData);
+        await axios.post(`${API_URL}/api/volunteer-opportunities`, opportunityFormData);
       }
       
       setShowOpportunityForm(false);
@@ -75,7 +75,7 @@ const VolunteerManagement = () => {
   const handleDeleteOpportunity = async (id) => {
     if (window.confirm('Are you sure you want to delete this opportunity?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/volunteer-opportunities/${id}`);
+        await axios.delete(`${API_URL}/api/volunteer-opportunities/${id}`);
         fetchData();
       } catch (error) {
         console.error('Error deleting opportunity:', error);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const InchargeManagement = () => {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +23,7 @@ const InchargeManagement = () => {
 
   const fetchMembers = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/InchargeMember');
+      const res = await axios.get(`${API_URL}/api/InchargeMember`);
       setMembers(res.data);
     } catch (e) {
       console.error('Error fetching incharge members', e);
@@ -51,9 +51,9 @@ const InchargeManagement = () => {
       if (imageFile) data.append('image', imageFile);
 
       if (editingMember) {
-        await axios.put(`http://localhost:5000/api/InchargeMember/${editingMember._id}`, data);
+        await axios.put(`${API_URL}/api/InchargeMember/${editingMember._id}`, data);
       } else {
-        await axios.post('http://localhost:5000/api/InchargeMember', data);
+        await axios.post(`${API_URL}/api/InchargeMember`, data);
       }
 
       setShowForm(false);
@@ -76,14 +76,14 @@ const InchargeManagement = () => {
       email: member.socials?.email || ''
     });
     setImageFile(null);
-    setImagePreview(member.image ? `http://localhost:5000/uploads/${member.image}` : '');
+    setImagePreview(member.image ? `${API_URL}/uploads/${member.image}` : '');
     setShowForm(true);
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this incharge member?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/InchargeMember/${id}`);
+      await axios.delete(`${API_URL}/api/InchargeMember/${id}`);
       fetchMembers();
     } catch (e) {
       console.error('Error deleting incharge member', e);
