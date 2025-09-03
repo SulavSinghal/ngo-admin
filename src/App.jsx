@@ -16,7 +16,14 @@ import VolunteerStoryManagement from './pages/VolunteerStory';
 import ContactPage from './pages/ContactPageManagement';
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading} = useAuth();
+   if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div>Loading session...</div>
+      </div>
+    );
+  }
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 

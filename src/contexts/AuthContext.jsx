@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react'; // 1. Import useMemo
 import axios from 'axios';
+
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const AuthContext = createContext();
 
@@ -20,7 +21,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
     if (token) {
-      // Verify token with backend
       verifyToken(token);
     } else {
       setLoading(false);
@@ -29,18 +29,21 @@ export const AuthProvider = ({ children }) => {
 
   const verifyToken = async (token) => {
     try {
-      const response = await axios.get(`${API_URL}/api/verify-admin`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // Set the header first for the verification request itself
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      const response = await axios.get(`${API_URL}/api/verify-admin`); // Removed headers since it's now a default
+
       if (response.data.valid) {
         setIsAuthenticated(true);
         setUser(response.data.user);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       } else {
-        localStorage.removeItem('adminToken');
+        // 2. If token is invalid, call logout() for a full cleanup
+        logout();
       }
     } catch (error) {
-      localStorage.removeItem('adminToken');
+      // 2. If verification fails, call logout() for a full cleanup
+      console.error("Token verification failed:", error);
+      logout();
     } finally {
       setLoading(false);
     }
@@ -74,13 +77,17 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const value = {
-    isAuthenticated,
-    user,
-    loading,
-    login,
-    logout
-  };
+  // 3. Memoize the context value to prevent unnecessary re-renders
+  const value = useMemo(
+    () => ({
+      isAuthenticated,
+      user,
+      loading,
+      login,
+      logout
+    }),
+    [isAuthenticated, user, loading] // Dependencies for the memoization
+  );
 
   return (
     <AuthContext.Provider value={value}>
