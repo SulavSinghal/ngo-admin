@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const Card = ({ children }) => (
@@ -8,22 +8,24 @@ const Card = ({ children }) => (
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
-    blog: 0,
+    blogs: 0,
     activities: 0,
     teamMembers: 0,
     volunteers: 0,
     testimonials: 0
   });
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [location]);
 
   const fetchStats = async () => {
+    setLoading(true);
     try {
       const [blogRes, activitiesRes, teamRes, volunteersRes, testimonialsRes] = await Promise.all([
-        axios.get( `${API_URL}/api/blog`),
+        axios.get(`${API_URL}/api/blogs`),
         axios.get(`${API_URL}/api/activities`),
         axios.get(`${API_URL}/api/teamMembers`),
         axios.get(`${API_URL}/api/volunteer-applications`),
@@ -31,7 +33,7 @@ const Dashboard = () => {
       ]);
 
       setStats({
-        blog: blogRes.data.length,
+        blogs: blogRes.data.length,
         activities: activitiesRes.data.length,
         teamMembers: teamRes.data.length,
         volunteers: volunteersRes.data.length,
@@ -75,7 +77,7 @@ const Dashboard = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Blog Posts</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.blog}</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.blogs}</p>
             </div>
           </div>
         </Card>
