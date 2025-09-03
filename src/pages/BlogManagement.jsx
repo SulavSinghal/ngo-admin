@@ -1,18 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+// A helper function to format dates for the input field
+const formatDateForInput = (dateString) => {
+  if (!dateString) return new Date().toISOString().split('T')[0];
+  return new Date(dateString).toISOString().split('T')[0];
+};
+
 const BlogManagement = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
+  
   const [formData, setFormData] = useState({
     title: '',
-    content: '',
+    description: '',
     category: '',
-    date: new Date().toISOString().split('T')[0],
+    date: formatDateForInput(),
+    location: '',
+    details: '',
     existingImageUrl: ''
   });
+
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
 
@@ -22,7 +34,7 @@ const BlogManagement = () => {
 
   const fetchBlogs = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/blog`);
+      const response = await axios.get(`${API_URL}/api/blogs`);
       setBlogs(response.data);
     } catch (error) {
       console.error('Error fetching blogs:', error);
@@ -33,41 +45,45 @@ const BlogManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const data = new FormData();
-      data.append('title', formData.title);
-      data.append('content', formData.content);
-      data.append('category', formData.category);
-      if (formData.date) data.append('date', formData.date);
-      if (imageFile) {
-        data.append('image', imageFile);
-      } else if (formData.existingImageUrl) {
-        data.append('imageUrl', formData.existingImageUrl);
-      }
+    
+    const dataPayload = new FormData();
+    dataPayload.append('title', formData.title);
+    dataPayload.append('description', formData.description);
+    dataPayload.append('category', formData.category);
+    dataPayload.append('date', formData.date);
+    dataPayload.append('location', formData.location);
+    dataPayload.append('details', formData.details);
+    
+    if (imageFile) {
+      dataPayload.append('image', imageFile);
+    } else if (formData.existingImageUrl) {
+      dataPayload.append('imageUrl', formData.existingImageUrl);
+    }
 
+    try {
       if (editingBlog) {
-        await axios.put(`${API_URL}/api/blog/${editingBlog._id}`, data);
+        await axios.put(`${API_URL}/api/blogs/${editingBlog._id}`, dataPayload);
       } else {
-        await axios.post(`${API_URL}/api/blog`, data);
+        await axios.post(`${API_URL}/api/blogs`, dataPayload);
       }
       
-      setShowForm(false);
-      setEditingBlog(null);
-      resetForm();
+      cancelForm();
       fetchBlogs();
     } catch (error) {
-      console.error('Error saving blog:', error);
+      console.error('Error saving blog:', error.response ? error.response.data : error.message);
     }
   };
 
   const handleEdit = (blog) => {
     setEditingBlog(blog);
     setFormData({
-      title: blog.title,
-      content: blog.content,
-      category: blog.category,
+      title: blog.title || '',
+      description: blog.description || '',
+      category: blog.category || '',
+      date: formatDateForInput(blog.date),
+      location: blog.location || '',
+      details: blog.details || '',
       existingImageUrl: blog.imageUrl || '',
-      date: blog.date ? new Date(blog.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
     });
     setImageFile(null);
     setImagePreview(blog.imageUrl ? `${API_URL}${blog.imageUrl}` : '');
@@ -77,7 +93,7 @@ const BlogManagement = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this blog post?')) {
       try {
-        await axios.delete(`${API_URL}/api/blog/${id}`);
+        await axios.delete(`${API_URL}/api/blogs/${id}`);
         fetchBlogs();
       } catch (error) {
         console.error('Error deleting blog:', error);
@@ -88,9 +104,11 @@ const BlogManagement = () => {
   const resetForm = () => {
     setFormData({
       title: '',
-      content: '',
+      description: '',
       category: '',
-      date: new Date().toISOString().split('T')[0],
+      date: formatDateForInput(),
+      location: '',
+      details: '',
       existingImageUrl: ''
     });
     setImageFile(null);
@@ -114,129 +132,78 @@ const BlogManagement = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
+        {/* ... (Header and Add New Button JSX is the same) ... */}
+         <div>
           <h1 className="text-2xl font-bold text-gray-900">Blog Management</h1>
           <p className="text-gray-600">Manage your blog posts and articles</p>
         </div>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            resetForm();
+            setShowForm(true);
+          }}
           className="px-4 py-2 rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
         >
           Add New Blog Post
         </button>
       </div>
 
-      {/* Blog Form */}
       {showForm && (
         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+          {/* ... (The entire <form> JSX is the same) ... */}
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             {editingBlog ? 'Edit Blog Post' : 'Add New Blog Post'}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Title *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter blog title"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                <input type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter blog title" />
               </div>
-              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category
-                </label>
-                <input
-                  type="text"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter category"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                <input type="text" required value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., Education, Social Welfare" />
               </div>
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Content *
-              </label>
-              <textarea
-                required
-                rows={6}
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter blog content"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+              <textarea required rows={3} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="A short summary for the blog card" />
             </div>
-
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Full Content (Details)</label>
+              <textarea rows={6} value={formData.details} onChange={(e) => setFormData({ ...formData, details: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter the full blog content here" />
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    setImageFile(file || null);
-                    setImagePreview(file ? URL.createObjectURL(file) : '');
-                  }}
-                  className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
-                />
-                {(imagePreview || formData.existingImageUrl) && (
-                  <img
-                    src={imagePreview || `${API_URL}${formData.existingImageUrl}`}
-                    alt="Preview"
-                    className="mt-3 h-32 w-32 object-cover rounded border"
-                  />
-                )}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Location *</label>
+                <input type="text" required value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., New Delhi, India" />
               </div>
-              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date *</label>
+                <input type="date" required value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
               </div>
             </div>
-
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+              <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; setImageFile(file || null); setImagePreview(file ? URL.createObjectURL(file) : ''); }} className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200" />
+              {(imagePreview || formData.existingImageUrl) && (
+                <img src={imagePreview || `${API_URL}${formData.existingImageUrl}`} alt="Preview" className="mt-3 h-32 w-32 object-cover rounded border" />
+              )}
+            </div>
             <div className="flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={cancelForm}
-                className="px-4 py-2 rounded-md font-medium bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-              >
-                {editingBlog ? 'Update Blog' : 'Create Blog'}
-              </button>
+              <button type="button" onClick={cancelForm} className="px-4 py-2 rounded-md font-medium bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors">Cancel</button>
+              <button type="submit" className="px-4 py-2 rounded-md font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors">{editingBlog ? 'Update Blog' : 'Create Blog'}</button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Blogs List */}
+      {/* ========= THIS IS THE RESTORED SECTION ========= */}
       <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">All Blog Posts</h2>
         {blogs.length === 0 ? (
           <div className="text-center text-gray-500 py-8">
-            <span className="text-4xl">📝</span>
-            <p className="mt-2">No blog posts found</p>
+            <p className="mt-2">No blog posts found. Click "Add New Blog Post" to get started.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
