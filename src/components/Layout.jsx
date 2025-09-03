@@ -13,13 +13,12 @@ const Layout = () => {
     { name: 'Blog Posts', href: '/blog', icon: '📝' },
     { name: 'Activities', href: '/activities', icon: '🎯' },
     { name: 'Team Members', href: '/team', icon: '👥' },
-    { name: 'Slides', href: '/slides', icon: '🖼️' },
+    { name: ' HomePage', href: '/slides', icon: '🖼️' },
     { name: 'Incharges', href: '/incharges', icon: '🧑‍💼' },
     { name: 'Volunteers', href: '/volunteers', icon: '🤝' },
-    { name: 'About Us', href: '/about-us', icon: 'ℹ️' },
     { name: 'Testimonials', href: '/testimonials', icon: '💬' },
     { name: 'Volunteer Stories', href: '/volunteer-stories', icon: '📖' },
-    {name: 'Contact Us',href:'/contact-page',icon:''}
+    { name: 'Contact Us', href: '/contact-page', icon: '📞' }
   ];
 
   const handleLogout = () => {
@@ -34,7 +33,7 @@ const Layout = () => {
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0`}>
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-          <h1 className="text-xl font-bold text-gray-800">NGO Admin</h1>
+          <h1 className="text-xl font-bold text-gray-800">MWNAM NGO</h1>
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600"
